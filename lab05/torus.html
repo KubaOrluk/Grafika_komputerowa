@@ -74,7 +74,7 @@ function createRectColor(r,g,b)
 
 function startGL() 
 {
-  alert("StartGL");
+  //alert("StartGL");
   let canvas = document.getElementById("canvas3D"); //wyszukanie obiektu w strukturze strony 
   gl = canvas.getContext("experimental-webgl"); //pobranie kontekstu OpenGL'u z obiektu canvas
   gl.viewportWidth = canvas.width; //przypisanie wybranej przez nas rozdzielczości do systemu OpenGL
@@ -130,36 +130,31 @@ function startGL()
   
   //Opis sceny 3D, położenie punktów w przestrzeni 3D w formacie X,Y,Z 
   let vertexPosition = []; //3 punkty po 3 składowe - X1,Y1,Z1, X2,Y2,Z2, X3,Y3,Z3 - 1 trójkąt
-  let stepElevation = 90/6;
-  let stepAngle = 360/12;
-  let radius = 2.0;
-  for(let elevation=-90; elevation< 90; elevation+= stepElevation)
+  let stepElevation = 1;
+  let smallStepAngle = 360/64;
+  let bigStepAngle = 360/64;
+  let smallRadius = 0.5;
+  let bigRadius = 2.0;
+  for(let bigAngle = 0; bigAngle < 360; bigAngle+= bigStepAngle)
   {
-    let radiusXZ = radius*Math.cos(elevation*Math.PI/180);
-    let radiusY  = radius*Math.sin(elevation*Math.PI/180);
-    
-    let radiusXZ2 = radius*Math.cos((elevation+stepElevation)*Math.PI/180);
-    let radiusY2  = radius*Math.sin((elevation+stepElevation)*Math.PI/180);
-    
-    for(let angle = 0; angle < 360; angle+= stepAngle)
+    for(let smallAngle = 0; smallAngle < 360; smallAngle+= smallStepAngle)
     {
+      let px1 = (bigRadius+(smallRadius*Math.cos(smallAngle*Math.PI/180)))*Math.cos(bigAngle*Math.PI/180);
+      let py1 = (bigRadius+(smallRadius*Math.cos(smallAngle*Math.PI/180)))*Math.sin(bigAngle*Math.PI/180);
+      let pz1 = smallRadius*Math.sin(smallAngle*Math.PI/180);
       
-      let px1 = radiusXZ*Math.cos(angle*Math.PI/180);
-      let py1 = radiusY;
-      let pz1 = radiusXZ*Math.sin(angle*Math.PI/180);
+      let px2 = (bigRadius+(smallRadius*Math.cos((smallAngle+smallStepAngle)*Math.PI/180)))*Math.cos(bigAngle*Math.PI/180);
+      let py2 = (bigRadius+(smallRadius*Math.cos((smallAngle+smallStepAngle)*Math.PI/180)))*Math.sin(bigAngle*Math.PI/180);
+      let pz2 = smallRadius*Math.sin((smallAngle+smallStepAngle)*Math.PI/180);
       
-      let px2 = radiusXZ*Math.cos((angle+stepAngle)*Math.PI/180);
-      let py2 = radiusY;
-      let pz2 = radiusXZ*Math.sin((angle+stepAngle)*Math.PI/180);
+      let px3 = (bigRadius+(smallRadius*Math.cos(smallAngle*Math.PI/180)))*Math.cos((bigAngle+bigStepAngle)*Math.PI/180);
+      let py3 = (bigRadius+(smallRadius*Math.cos(smallAngle*Math.PI/180)))*Math.sin((bigAngle+bigStepAngle)*Math.PI/180);
+      let pz3 = smallRadius*Math.sin(smallAngle*Math.PI/180);
       
-      let px3 = radiusXZ2*Math.cos(angle*Math.PI/180);
-      let py3 = radiusY2;
-      let pz3 = radiusXZ2*Math.sin(angle*Math.PI/180);
-      
-      let px4 = radiusXZ2*Math.cos((angle+stepAngle)*Math.PI/180);
-      let py4 = radiusY2;
-      let pz4 = radiusXZ2*Math.sin((angle+stepAngle)*Math.PI/180);
-      
+      let px4 = (bigRadius+(smallRadius*Math.cos((smallAngle+smallStepAngle)*Math.PI/180)))*Math.cos((bigAngle+bigStepAngle)*Math.PI/180);
+      let py4 = (bigRadius+(smallRadius*Math.cos((smallAngle+smallStepAngle)*Math.PI/180)))*Math.sin((bigAngle+bigStepAngle)*Math.PI/180);
+      let pz4 = smallRadius*Math.sin((smallAngle+smallStepAngle)*Math.PI/180);
+    
       vertexPosition.push(...createRect2(px1,py1,pz1,px2,py2,pz2,px3,py3,pz3,px4,py4,pz4)); // Ściana XZ
     }
   }
@@ -175,7 +170,7 @@ function startGL()
   
   for(let elevation=-90; elevation< 90; elevation+= stepElevation)
   {
-    for(let angle = 0; angle < 360; angle+= stepAngle)
+    for(let angle = 0; angle < 360; angle+= smallStepAngle)
     {
       vertexColor.push(...createRectColor(1.0,1.0,1.0));
     }
@@ -191,7 +186,7 @@ function startGL()
   
   for(let elevation=-90; elevation< 90; elevation+= stepElevation)
   {
-    for(let angle = 0; angle < 360; angle+= stepAngle)
+    for(let angle = 0; angle < 360; angle+= smallStepAngle)
     {
       vertexCoords.push(...createRectCoords(0,0,1,0,0,1));
     }
@@ -233,7 +228,7 @@ function startGL()
 var angleZ = 0.0;
 var angleY = 0.0;
 var angleX = 0.0;
-var tz = -5.0;
+var tz = -7.0;
 function Tick()
 {  
   let uMVMatrix = [
@@ -328,6 +323,5 @@ function handlekeydown(e)
 </head>
 <body onload="startGL()" onkeydown="handlekeydown(event)">
 <canvas id="canvas3D" width="640" height="480" style="border: solid black 1px"></canvas>
-<img id="textureImg" src="Tex.png">
 </body>
 </html>
