@@ -358,7 +358,7 @@
     let vertexNormal;
     let indexes;
 
-    [indexes, vertexPosition, vertexNormal] = await LoadObj('tor.obj');
+    [indexes, vertexPosition, vertexNormal] = await LoadObj('armata.obj');
 
     vertexPositionBuffer = gl.createBuffer(); //Stworzenie tablicy w pamieci karty graficznej
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
@@ -396,17 +396,17 @@
   var angleY = 160.0;
   var angleX = -10.0;
 
-  var KameraPositionX = 4;
+  var KameraPositionX = -2;
   var KameraPositionY = -1.0;
-  var KameraPositionZ = -9.0;
+  var KameraPositionZ = -5.0;
   
-  var CarPositionX = 0.0;
-  var CarPositionY = 0.0;
-  var CarPositionZ = 0.0;
+  var KulaPositionX = 0.0;
+  var KulaPositionY = 0.0;
+  var KulaPositionZ = 0.0;
   
-  var CarAngleX = 0.0;
-  var CarAngleY = 0.0;
-  var CarAngleZ = 0.0;
+  var ArmataAngleX = 0.0;
+  var ArmataAngleY = 0.0;
+  var ArmataAngleZ = 0.0;
 
   var LightSize = 0.1;
   
@@ -414,16 +414,20 @@
   var LightPositionY = 15;
   var LightPositionZ = -10;
   
+  let StartKula = 0;
+
   function Tick()
   { 
     let uMMatrix0 = CreateIdentytyMatrix(); 
     let uMMatrix1 = CreateIdentytyMatrix();
     let uMMatrix2 = CreateIdentytyMatrix();
-    
+    let uMMatrix3 = CreateIdentytyMatrix();
+
     let uVMatrix = CreateIdentytyMatrix();
 
-    let CarCount = 676;
-    let TrackCount = 356;
+    let WheelCount = 372;
+    let ArmataCount = 958;
+    let KulaCount = 960;
 
     uVMatrix = MatrixMul(uVMatrix,CreateRotationXMatrix(angleX));
     uVMatrix = MatrixMul(uVMatrix,CreateRotationYMatrix(angleY));
@@ -431,14 +435,21 @@
     uVMatrix = MatrixMul(uVMatrix,CreateTranslationMatrix(KameraPositionX,KameraPositionY,KameraPositionZ));
     
     uMMatrix1 = MatrixMul(uMMatrix1,CreateScaleMatrix(0.5,0.5,0.5));
-    uMMatrix1 = MatrixMul(uMMatrix1,CreateRotationXMatrix(CarAngleX));
-    uMMatrix1 = MatrixMul(uMMatrix1,CreateRotationYMatrix(CarAngleY)); 
-    uMMatrix1 = MatrixMul(uMMatrix1,CreateRotationZMatrix(CarAngleZ));
-    uMMatrix1 = MatrixMul(uMMatrix1,CreateTranslationMatrix(CarPositionX,CarPositionY,CarPositionZ));  
+    uMMatrix1 = MatrixMul(uMMatrix1,CreateTranslationMatrix(0.0,0.0,0.0)); 
+    uMMatrix1 = MatrixMul(uMMatrix1,CreateRotationZMatrix(0.0));
 
     uMMatrix2 = MatrixMul(uMMatrix2,CreateScaleMatrix(0.5,0.5,0.5));
-    uMMatrix2 = MatrixMul(uMMatrix2,CreateRotationZMatrix(0.0));
     uMMatrix2 = MatrixMul(uMMatrix2,CreateTranslationMatrix(0.0,0.0,0.0)); 
+    uMMatrix2 = MatrixMul(uMMatrix2,CreateRotationXMatrix(ArmataAngleX));
+    uMMatrix2 = MatrixMul(uMMatrix2,CreateRotationYMatrix(ArmataAngleY)); 
+    uMMatrix2 = MatrixMul(uMMatrix2,CreateRotationZMatrix(ArmataAngleZ));
+
+    uMMatrix3 = MatrixMul(uMMatrix3,CreateScaleMatrix(0.5,0.5,0.5));
+    uMMatrix3 = MatrixMul(uMMatrix3,CreateRotationZMatrix(0.0));
+    uMMatrix3 = MatrixMul(uMMatrix3,CreateRotationXMatrix(ArmataAngleX));
+    uMMatrix3 = MatrixMul(uMMatrix3,CreateRotationYMatrix(ArmataAngleY)); 
+    uMMatrix3 = MatrixMul(uMMatrix3,CreateRotationZMatrix(ArmataAngleZ));
+    uMMatrix3 = MatrixMul(uMMatrix3,CreateTranslationMatrix(KulaPositionX,KulaPositionY,KulaPositionZ)); 
     
     uMMatrix0 = MatrixMul(uMMatrix0,CreateScaleMatrix(LightSize,LightSize,LightSize));
     uMMatrix0 = MatrixMul(uMMatrix0,CreateTranslationMatrix(LightPositionX,LightPositionY,LightPositionZ));
@@ -470,17 +481,24 @@
     
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     
-    //auto
-    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMMatrix"), false, new Float32Array(uMMatrix1));
-    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uInvMMatrix"), false, new Float32Array(MatrixTransposeInverse(uMMatrix1)));
-    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),1.0,0.0,0.0);  
-    gl.drawElements(gl.TRIANGLES, CarCount*3, gl.UNSIGNED_SHORT, 0);
-    
-    //tor
+    //armata
     gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMMatrix"), false, new Float32Array(uMMatrix2));
     gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uInvMMatrix"), false, new Float32Array(MatrixTransposeInverse(uMMatrix2)));
     gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),0.1,0.1,0.1);  
-    gl.drawElements(gl.TRIANGLES, TrackCount*3, gl.UNSIGNED_SHORT, CarCount*6);
+    gl.drawElements(gl.TRIANGLES, ArmataCount*3, gl.UNSIGNED_SHORT, 0);
+
+    //wheels
+    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMMatrix"), false, new Float32Array(uMMatrix1));
+    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uInvMMatrix"), false, new Float32Array(MatrixTransposeInverse(uMMatrix1)));
+    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),1.0,0.0,0.0);  
+    gl.drawElements(gl.TRIANGLES, WheelCount*3, gl.UNSIGNED_SHORT, ArmataCount*6);
+
+    //kula
+    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMMatrix"), false, new Float32Array(uMMatrix3));
+    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uInvMMatrix"), false, new Float32Array(MatrixTransposeInverse(uMMatrix3)));
+    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),0.1,0.1,0.1);  
+    gl.drawElements(gl.TRIANGLES, KulaCount*3, gl.UNSIGNED_SHORT, (ArmataCount + WheelCount)*6);
+
 
     //Obiekt Światła
     gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMMatrix"), false, new Float32Array(uMMatrix0));
@@ -488,40 +506,36 @@
     gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),1.0,1.0,0.0);
     gl.uniform1f(gl.getUniformLocation(shaderProgram, "uNormalMul"),-1.0);  
     gl.drawElements(gl.TRIANGLES, 0, gl.UNSIGNED_SHORT, 0);
-    
+
+    if(StartKula){
+        KulaPositionX = KulaPositionX - 0.3;
+        if(ArmataAngleZ < -20){
+          if(KulaPositionX < -1){
+            KulaPositionY = KulaPositionY - (ArmataAngleZ/100)*(ArmataAngleZ/100);
+          }
+          else if (KulaPositionX < -0.5){
+            KulaPositionY = KulaPositionY + 0.0;
+          }
+          else if (KulaPositionX < 0){
+            KulaPositionY = KulaPositionY + (ArmataAngleZ/100)*(ArmataAngleZ/100);
+          }
+        }else if(ArmataAngleZ > 0){
+          KulaPositionY = KulaPositionY - (ArmataAngleZ/50)*(ArmataAngleZ/50);
+        }
+        else if(ArmataAngleZ <= 0 && ArmataAngleZ >= -20){
+          if(KulaPositionX < -0.7){
+            KulaPositionY = KulaPositionY - 0.1;
+          }
+        }
+    }
+
     setTimeout(Tick,100);
   }
   function handlekeydown(e)
   {
-   // W A S D
-   if(e.keyCode==65){
-      if(CarAngleY == 0) CarAngleY = 90;
-      else if(CarAngleY == 90) CarAngleY = 180;
-      else if(CarAngleY == 180) CarAngleY = 270;
-      else if(CarAngleY == 270) CarAngleY = 0;
-   } 
-   if(e.keyCode==68){
-      if(CarAngleY == 0) CarAngleY = 270;
-      else if(CarAngleY == 90) CarAngleY = 0;
-      else if(CarAngleY == 180) CarAngleY = 90;
-      else if(CarAngleY == 270) CarAngleY = 180;
-   }
-   if(CarAngleY == 0){
-      if(e.keyCode==87) CarPositionZ=CarPositionZ+0.5; //W
-      if(e.keyCode==83) CarPositionZ=CarPositionZ-0.5; //S
-   }
-   if(CarAngleY == 90){
-      if(e.keyCode==87) CarPositionX=CarPositionX+0.5; //W
-      if(e.keyCode==83) CarPositionX=CarPositionX-0.5; //S
-   }
-   if(CarAngleY == 180){
-      if(e.keyCode==87) CarPositionZ=CarPositionZ-0.5; //W
-      if(e.keyCode==83) CarPositionZ=CarPositionZ+0.5; //S
-   }
-   if(CarAngleY == 270){
-      if(e.keyCode==87) CarPositionX=CarPositionX-0.5; //W
-      if(e.keyCode==83) CarPositionX=CarPositionX+0.5; //S
-   }
+    if(e.keyCode==87) ArmataAngleZ=ArmataAngleZ+0.5; //W
+    if(e.keyCode==83) ArmataAngleZ=ArmataAngleZ-0.5; //S
+    if(e.keyCode==32) StartKula = 1;
   }
   </script>
   </head>
