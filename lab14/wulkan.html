@@ -358,7 +358,7 @@
     let vertexNormal;
     let indexes;
 
-    [indexes, vertexPosition, vertexNormal] = await LoadObj('armata.obj');
+    [indexes, vertexPosition, vertexNormal] = await LoadObj('wulkan.obj');
 
     vertexPositionBuffer = gl.createBuffer(); //Stworzenie tablicy w pamieci karty graficznej
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
@@ -393,28 +393,24 @@
   //let angle = 45.0; //Macierz transformacji świata - określenie położenia kamery 
   
   var angleZ = 0.0;
-  var angleY = 160.0;
-  var angleX = -10.0;
+  var angleY = 0;
+  var angleX = 35;
 
-  var KameraPositionX = -2;
-  var KameraPositionY = -1.0;
-  var KameraPositionZ = -5.0;
-  
-  var KulaPositionX = 0.0;
-  var KulaPositionY = 0.0;
-  var KulaPositionZ = 0.0;
-  
-  var ArmataAngleX = 0.0;
-  var ArmataAngleY = 0.0;
-  var ArmataAngleZ = 0.0;
+  var KameraPositionX = 0;
+  var KameraPositionY = -0.7;
+  var KameraPositionZ = -3;
 
   var LightSize = 0.1;
   
   var LightPositionX = 0;
   var LightPositionY = 15;
-  var LightPositionZ = -10;
-  
-  let StartKula = 0;
+  var LightPositionZ = 10;
+
+  var expAngleZ = 0.0;
+
+  let lavaCount = 30;
+  let volcanoCount = 302;
+  let explosionCount = 0;
 
   function Tick()
   { 
@@ -424,10 +420,6 @@
     let uMMatrix3 = CreateIdentytyMatrix();
 
     let uVMatrix = CreateIdentytyMatrix();
-
-    let WheelCount = 372;
-    let ArmataCount = 958;
-    let KulaCount = 960;
 
     uVMatrix = MatrixMul(uVMatrix,CreateRotationXMatrix(angleX));
     uVMatrix = MatrixMul(uVMatrix,CreateRotationYMatrix(angleY));
@@ -440,15 +432,11 @@
 
     uMMatrix2 = MatrixMul(uMMatrix2,CreateScaleMatrix(0.5,0.5,0.5));
     uMMatrix2 = MatrixMul(uMMatrix2,CreateTranslationMatrix(0.0,0.0,0.0)); 
-    uMMatrix2 = MatrixMul(uMMatrix2,CreateRotationXMatrix(ArmataAngleX));
-    uMMatrix2 = MatrixMul(uMMatrix2,CreateRotationYMatrix(ArmataAngleY)); 
-    uMMatrix2 = MatrixMul(uMMatrix2,CreateRotationZMatrix(ArmataAngleZ));
+    uMMatrix2 = MatrixMul(uMMatrix2,CreateRotationZMatrix(0.0));
 
     uMMatrix3 = MatrixMul(uMMatrix3,CreateScaleMatrix(0.5,0.5,0.5));
-    uMMatrix3 = MatrixMul(uMMatrix3,CreateRotationXMatrix(ArmataAngleX));
-    uMMatrix3 = MatrixMul(uMMatrix3,CreateRotationYMatrix(ArmataAngleY)); 
-    uMMatrix3 = MatrixMul(uMMatrix3,CreateRotationZMatrix(ArmataAngleZ));
-    uMMatrix3 = MatrixMul(uMMatrix3,CreateTranslationMatrix(KulaPositionX,KulaPositionY,KulaPositionZ)); 
+    uMMatrix3 = MatrixMul(uMMatrix3,CreateRotationYMatrix(expAngleZ));
+    uMMatrix3 = MatrixMul(uMMatrix3,CreateTranslationMatrix(0.0,0.0,0.0)); 
     
     uMMatrix0 = MatrixMul(uMMatrix0,CreateScaleMatrix(LightSize,LightSize,LightSize));
     uMMatrix0 = MatrixMul(uMMatrix0,CreateTranslationMatrix(LightPositionX,LightPositionY,LightPositionZ));
@@ -480,23 +468,23 @@
     
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
     
-    //armata
+    //lava
     gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMMatrix"), false, new Float32Array(uMMatrix2));
     gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uInvMMatrix"), false, new Float32Array(MatrixTransposeInverse(uMMatrix2)));
-    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),0.1,0.1,0.1);  
-    gl.drawElements(gl.TRIANGLES, ArmataCount*3, gl.UNSIGNED_SHORT, 0);
+    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),0.9,0.7,0.0);  
+    gl.drawElements(gl.TRIANGLES, lavaCount*3, gl.UNSIGNED_SHORT, 0);
 
-    //wheels
+    //wulkan
     gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMMatrix"), false, new Float32Array(uMMatrix1));
     gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uInvMMatrix"), false, new Float32Array(MatrixTransposeInverse(uMMatrix1)));
-    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),1.0,0.0,0.0);  
-    gl.drawElements(gl.TRIANGLES, WheelCount*3, gl.UNSIGNED_SHORT, ArmataCount*6);
+    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),0.4,0.2,0.0);  
+    gl.drawElements(gl.TRIANGLES, volcanoCount*3, gl.UNSIGNED_SHORT, lavaCount*6);
 
-    //kula
+    //eksplosja
     gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMMatrix"), false, new Float32Array(uMMatrix3));
     gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uInvMMatrix"), false, new Float32Array(MatrixTransposeInverse(uMMatrix3)));
-    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),0.1,0.1,0.1);  
-    gl.drawElements(gl.TRIANGLES, KulaCount*3, gl.UNSIGNED_SHORT, (ArmataCount + WheelCount)*6);
+    gl.uniform3f(gl.getUniformLocation(shaderProgram, "uColor"),0.4,0.4,0.4);  
+    gl.drawElements(gl.TRIANGLES, explosionCount*3, gl.UNSIGNED_SHORT, (lavaCount + volcanoCount)*6);
 
 
     //Obiekt Światła
@@ -506,35 +494,15 @@
     gl.uniform1f(gl.getUniformLocation(shaderProgram, "uNormalMul"),-1.0);  
     gl.drawElements(gl.TRIANGLES, 0, gl.UNSIGNED_SHORT, 0);
 
-    if(StartKula){
-        KulaPositionX = KulaPositionX - 0.3;
-        if(ArmataAngleZ < -20){
-          if(KulaPositionX < -1){
-            KulaPositionY = KulaPositionY - (ArmataAngleZ/100)*(ArmataAngleZ/100);
-          }
-          else if (KulaPositionX < -0.5){
-            KulaPositionY = KulaPositionY + 0.0;
-          }
-          else if (KulaPositionX < 0){
-            KulaPositionY = KulaPositionY + (ArmataAngleZ/100)*(ArmataAngleZ/100);
-          }
-        }else if(ArmataAngleZ > 0){
-          KulaPositionY = KulaPositionY - (ArmataAngleZ/50)*(ArmataAngleZ/50);
-        }
-        else if(ArmataAngleZ <= 0 && ArmataAngleZ >= -20){
-          if(KulaPositionX < -0.7){
-            KulaPositionY = KulaPositionY - 0.1;
-          }
-        }
+    if(explosionCount == 11644){
+      expAngleZ = expAngleZ + 70;
     }
-
-    setTimeout(Tick,100);
+    setTimeout(Tick,25);
   }
   function handlekeydown(e)
   {
-    if(e.keyCode==87) ArmataAngleZ=ArmataAngleZ+0.5; //W
-    if(e.keyCode==83) ArmataAngleZ=ArmataAngleZ-0.5; //S
-    if(e.keyCode==32) StartKula = 1;
+    if(e.keyCode==87) explosionCount = 11644; //W
+    if(e.keyCode==83) explosionCount = 0; //S
   }
   </script>
   </head>
